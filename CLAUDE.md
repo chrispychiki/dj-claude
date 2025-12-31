@@ -21,6 +21,8 @@ Then run:
 4. `bun scripts/browser.ts click '#play-pause'`
 5. `bun scripts/browser.ts verify` - confirms audio is playing
 
+Browser console and page errors are piped to background task output (`[BROWSER LOG]`, `[BROWSER ERROR]`).
+
 Other browser tools exist (e.g. screenshot, fill) in case the user needs assistance. Run `bun scripts/browser.ts help` for available commands.
 
 ## DJing

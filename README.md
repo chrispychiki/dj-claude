@@ -40,6 +40,16 @@ Includes drum samples from [Dirt](https://github.com/tidalcycles/Dirt-Samples) p
 
 AGPL-3.0 (required by @strudel/core dependency)
 
+## Future work
+
+Validation parity is fundamentally hard. Server-side validation uses `@strudel/transpiler` to parse and evaluate patterns and checks for unknown sounds, but some things only fail at the audio layer in a browser context. Gaps exist in both directions: patterns may pass validation but fail in browser, or fail validation but would have worked. Even when both server validation and browser evaluation pass, specific sounds or functions can fail silently during playback.
+
+Known issues we've fixed through trial and error:
+- Numeric sample names (808, 909) - mini-notation parser converts to numbers
+- AudioWorklet initialization - effects like `crush()`, `coarse()`, `distort()` require `initAudio()` before evaluation
+
+Confidence in full parity remains low. A more robust approach would move validation to the browser itself: evaluate the pattern, run one muted cycle, capture console errors, report back. This catches both evaluation errors and runtime errors in the same environment that plays the audio.
+
 ## Notes
 
 All code written and tested by Claude. Forgive me for any slop you encounter.
