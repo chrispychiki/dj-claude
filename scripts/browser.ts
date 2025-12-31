@@ -140,7 +140,7 @@ async function executeCommand(command: string, args: string[]): Promise<string> 
     }
 
     case 'verify': {
-      const started = await page.evaluate(() => (globalThis as any).repl?.scheduler?.started);
+      const started = await page.evaluate(() => ((globalThis as any).document.getElementById('editor') as any)?.editor?.repl?.state?.started);
       if (started) {
         return 'Audio is playing';
       } else {

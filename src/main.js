@@ -1,33 +1,19 @@
-import { evalScope } from '@strudel/core';
-import { evaluate } from '@strudel/transpiler';
-import { webaudioRepl, samples, registerSynthSounds } from '@strudel/webaudio';
-import { registerSoundfonts } from '@strudel/soundfonts';
-
 let currentHash = null;
+let editor = null;
+let isPlaying = false;
+let lastReportedCount = 0;
 
-async function loadSounds() {
-  await evalScope(
-    import('@strudel/core'),
-    import('@strudel/mini'),
-    import('@strudel/webaudio'),
-    import('@strudel/draw'),
-    import('@strudel/soundfonts'),
-  );
-  registerSoundfonts();
-  registerSynthSounds();
-  await samples('github:tidalcycles/dirt-samples');
-
-  const { soundMap } = await import('superdough');
+function reportSoundsIfChanged() {
   const sounds = Object.keys(soundMap.get());
-  await fetch('/sounds', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sounds }),
-  });
-}
-
-async function init() {
-  window.repl = webaudioRepl();
+  if (sounds.length > lastReportedCount) {
+    lastReportedCount = sounds.length;
+    fetch('/sounds', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sounds }),
+    });
+    console.log(`Reported ${sounds.length} sounds to server`);
+  }
 }
 
 async function fetchPattern() {
@@ -41,11 +27,20 @@ async function fetchPattern() {
   }
 }
 
+function updatePlayPauseButton() {
+  const btn = document.getElementById('play-pause');
+  btn.textContent = isPlaying ? '❚❚' : '▶';
+  btn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+}
+
 async function applyPattern(code) {
+  if (!editor?.editor) return false;
   try {
     const wrapped = `(${code}).scope()`;
-    const { pattern } = await evaluate(wrapped);
-    await window.repl.scheduler.setPattern(pattern, true);
+    editor.editor.setCode(wrapped);
+    if (isPlaying) {
+      await editor.editor.evaluate();
+    }
     return true;
   } catch (e) {
     console.error('Failed to apply pattern:', e);
@@ -54,30 +49,63 @@ async function applyPattern(code) {
 }
 
 async function poll() {
+  // Report here because samples() doesn't await soundMap population,
+  // and soundMap.subscribe()/listen() don't fire for dirt-samples loading
+  reportSoundsIfChanged();
   const data = await fetchPattern();
   if (data && data.pattern && data.hash !== currentHash) {
     const success = await applyPattern(data.pattern);
     if (success) {
       currentHash = data.hash;
-      document.getElementById('status').textContent = `Pattern: ${data.hash}`;
     }
   }
 }
 
-loadSounds();
+async function togglePlayPause() {
+  if (!editor?.editor) return;
 
-document.getElementById('start').addEventListener('click', async () => {
-  document.getElementById('start').disabled = true;
-  document.getElementById('status').textContent = 'Starting...';
+  if (isPlaying) {
+    editor.editor.stop();
+    isPlaying = false;
+  } else {
+    await editor.editor.evaluate();
+    isPlaying = true;
+  }
+  updatePlayPauseButton();
+}
 
-  await init();
+async function init() {
+  editor = document.getElementById('editor');
+  const playPauseBtn = document.getElementById('play-pause');
 
-  const data = await fetchPattern();
-  if (data && data.pattern) {
-    await applyPattern(data.pattern);
-    currentHash = data.hash;
-    document.getElementById('status').textContent = `Pattern: ${data.hash}`;
+  if (!playPauseBtn) {
+    console.error('play-pause button not found');
+    return;
   }
 
+  playPauseBtn.addEventListener('click', togglePlayPause);
+
+  await customElements.whenDefined('strudel-editor');
+
+  // No await - samples() returns before soundMap is populated anyway
+  samples('github:tidalcycles/dirt-samples');
+  reportSoundsIfChanged();
+
+  const data = await fetchPattern();
+  if (data && data.pattern && editor.editor) {
+    currentHash = data.hash;
+    const wrapped = `(${data.pattern}).scope()`;
+    editor.editor.setCode(wrapped);
+  }
+
+  // Block editing but allow scroll
+  document.querySelector('.cm-content')?.addEventListener('mousedown', e => e.preventDefault(), true);
+
   setInterval(poll, 500);
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

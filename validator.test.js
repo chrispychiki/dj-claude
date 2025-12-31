@@ -1,4 +1,4 @@
-import { test, expect, describe, beforeAll } from 'bun:test';
+import { test, expect, describe, beforeAll, afterAll } from 'bun:test';
 import { validate, setBrowserSounds } from './validator.js';
 
 const TEST_SOUNDS = ['bd', 'sd', 'hh', 'cp', 'lt', 'mt', 'ht', 'arpy', 'bass', 'casio'];
@@ -147,6 +147,58 @@ describe('validator', () => {
       const result = await validate('s("bdd")'); // typo for bd
       expect(result.valid).toBe(false);
       expect(result.error).toContain('bdd');
+    });
+  });
+
+  describe('numeric sound filtering', () => {
+    afterAll(() => {
+      setBrowserSounds(TEST_SOUNDS);
+    });
+
+    test('numeric-only sounds are filtered and rejected', async () => {
+      setBrowserSounds(['bd', 'sd', '808', '909', '808bd']);
+      const result = await validate('s("808")');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('808');
+    });
+
+    test('sounds starting with numbers but not purely numeric work', async () => {
+      setBrowserSounds(['bd', 'sd', '808', '909', '808bd']);
+      const result = await validate('s("808bd")');
+      expect(result.valid).toBe(true);
+    });
+  });
+
+  describe('bank-based sounds', () => {
+    afterAll(() => {
+      setBrowserSounds(TEST_SOUNDS);
+    });
+
+    test('valid bank_sample combination', async () => {
+      setBrowserSounds(['bd', 'sd', 'mybank_kick', 'mybank_snare']);
+      const result = await validate('s("kick snare").bank("mybank")');
+      expect(result.valid).toBe(true);
+      expect(result.eventCount).toBe(2);
+    });
+
+    test('invalid bank_sample combination', async () => {
+      setBrowserSounds(['bd', 'sd', 'mybank_kick']);
+      const result = await validate('s("kick snare").bank("mybank")');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('mybank_snare');
+    });
+
+    test('mix of banked and non-banked sounds', async () => {
+      setBrowserSounds(['bd', 'sd', 'mybank_kick']);
+      const result = await validate('stack(s("bd sd"), s("kick").bank("mybank"))');
+      expect(result.valid).toBe(true);
+    });
+
+    test('unknown bank with valid sample name', async () => {
+      setBrowserSounds(['bd', 'sd', 'kick']);
+      const result = await validate('s("kick").bank("unknownbank")');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('unknownbank_kick');
     });
   });
 
