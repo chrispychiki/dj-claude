@@ -16,7 +16,7 @@ Patterns are validated using `@strudel/core` before the browser sees them. Inval
 
 ## Usage
 
-Start Claude Code in this directory and ask for whatever you'd like.
+Start Claude Code in this directory and ask for whatever you'd like. Enable auto-accept edits (<kbd>Shift</kbd>+<kbd>Tab</kbd>). You may want to modify the intro paragraph in `CLAUDE.md` to set your preferred vibe (restart Claude Code to apply changes).
 
 Example prompts:
 
