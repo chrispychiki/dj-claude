@@ -16,6 +16,7 @@ Start these in background (you MUST use run_in_background: true, never use &):
 2. `bun scripts/browser.ts start`
 
 Then run:
+
 3. `bun scripts/browser.ts navigate http://localhost:3000`
 4. `bun scripts/browser.ts click '#play-pause'`
 5. `bun scripts/browser.ts verify` - confirms audio is playing

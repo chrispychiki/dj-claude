@@ -18,7 +18,11 @@ Patterns are validated using `@strudel/core` before the browser sees them. Inval
 
 Start Claude Code in this directory and ask for whatever you'd like.
 
-Example prompt: let's play some tunes! give me some original claude goodness. play each piece for a minute or two (just sleep yourself in between updates) and give me around a 10 min set. go for a variety of different sounds/styles across your set!
+Example prompts:
+
+- "Let's play some tunes! Give me some original Claude goodness. Play each piece for a minute or two and give me around a 10 min set. Go for a variety of different sounds/styles across your set!"
+- "I'd like some lofi beats to study to. Switch it up every minute or two."
+- "Show me what you got."
 
 ## Manual usage
 
