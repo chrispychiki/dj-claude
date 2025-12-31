@@ -68,6 +68,7 @@ async function togglePlayPause() {
     editor.editor.stop();
     isPlaying = false;
   } else {
+    await initAudio();
     await editor.editor.evaluate();
     isPlaying = true;
   }

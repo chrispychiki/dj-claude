@@ -1,35 +1,27 @@
-// Late Night Drive
-
+// 3am
 stack(
-  // Kick with a bit of swing
-  s("bd*4").gain(0.8),
+  s("bd ~ [~ bd] ~, ~ cp ~ ~")
+    .gain(0.65),
 
-  // Rim on the offbeats
-  s("~ rim ~ rim").gain(0.4),
+  s("hh(3,8)")
+    .gain(0.15),
 
-  // Shuffled hats
-  s("hh(5,8)").gain(0.28),
-
-  // Open hat accent
-  s("~ ~ ~ oh").gain(0.3),
-
-  // Deep bass in D minor
-  note("d2 d2 a1 a1 bb1 bb1 c2 c2")
+  note("d2 ~ ~ d2 ~ d2 ~ ~, ~ ~ f2 ~ ~ ~ a2 ~")
     .s("sawtooth")
     .lpf(350)
-    .gain(0.6)
-    .decay(0.2),
+    .gain(0.45),
 
-  // Rhodes chords: Dm - Am - Bb - C
-  note("<[d3,f3,a3] [a2,c3,e3] [bb2,d3,f3] [c3,e3,g3]>")
-    .s("gm_epiano2")
-    .gain(0.38)
-    .lpf(2200)
-    .room(0.4),
+  note("~ ~ <d4 f4> ~")
+    .s("sine")
+    .phaser(0.8)
+    .phaserdepth(0.6)
+    .gain(0.25)
+    .room(0.7)
+    .delay(0.4),
 
-  // Simple melody
-  note("d4 f4 ~ e4 d4 ~ c4 a3")
-    .s("gm_vibraphone")
-    .gain(0.3)
-    .room(0.5)
-).cpm(108)
+  s("breaks165:0")
+    .striate(8)
+    .coarse(4)
+    .lpf(2500)
+    .gain(0.2)
+).cpm(72)
