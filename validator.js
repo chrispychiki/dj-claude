@@ -39,8 +39,12 @@ export async function validate(code) {
     const unknown = new Set();
     for (const event of events) {
       const s = event.value?.s;
-      if (s && !isValidSound(s)) {
-        unknown.add(s);
+      const bank = event.value?.bank;
+      if (s) {
+        const soundName = bank ? `${bank}_${s}` : s;
+        if (!isValidSound(soundName)) {
+          unknown.add(soundName);
+        }
       }
     }
 
