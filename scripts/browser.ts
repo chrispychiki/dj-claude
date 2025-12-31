@@ -2,7 +2,7 @@ import { chromium } from '@playwright/test';
 import type { Browser, Page, BrowserContext } from '@playwright/test';
 import { resolve } from 'node:path';
 import { mkdirSync, existsSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
-import { createServer } from 'node:http';
+import { createServer, request as httpRequest, type IncomingMessage } from 'node:http';
 import { execSync } from 'node:child_process';
 
 const screenshotsDir = resolve(process.cwd(), 'screenshots');
@@ -90,7 +90,7 @@ async function executeCommand(command: string, args: string[]): Promise<string> 
 
   switch (command) {
     case 'navigate': {
-      const [url] = args;
+      const url = args[0]!;
       console.log('🌐 Navigating to:', url);
       await page.goto(url);
       await page.waitForLoadState('load');
@@ -98,14 +98,15 @@ async function executeCommand(command: string, args: string[]): Promise<string> 
     }
 
     case 'click': {
-      const [selector] = args;
+      const selector = args[0]!;
       console.log('👆 Clicking:', selector);
       await page.click(selector, { timeout: 30000 });
       return 'Click complete';
     }
 
     case 'fill': {
-      const [selector, text] = args;
+      const selector = args[0]!;
+      const text = args[1]!;
       console.log('✍️  Filling:', selector, 'with:', text);
       await page.fill(selector, text, { timeout: 30000 });
       return 'Fill complete';
@@ -120,20 +121,10 @@ async function executeCommand(command: string, args: string[]): Promise<string> 
 
     case 'screenshot': {
       const viewportOnly = args.includes('--viewport');
-      const pathArgs = args.filter(arg => arg !== '--viewport');
-      const [customPath] = pathArgs;
-      let screenshotPath: string;
-
-      if (customPath) {
-        screenshotPath = resolve(process.cwd(), customPath);
-        const dir = screenshotPath.substring(0, screenshotPath.lastIndexOf('/'));
-        mkdirSync(dir, { recursive: true });
-      } else {
-        mkdirSync(screenshotsDir, { recursive: true });
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const filename = `${timestamp}.png`;
-        screenshotPath = resolve(screenshotsDir, filename);
-      }
+      mkdirSync(screenshotsDir, { recursive: true });
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const filename = `${timestamp}.png`;
+      const screenshotPath = resolve(screenshotsDir, filename);
 
       await page.screenshot({ path: screenshotPath, fullPage: !viewportOnly });
       execSync(`sips -Z 1920 "${screenshotPath}"`);
@@ -142,14 +133,14 @@ async function executeCommand(command: string, args: string[]): Promise<string> 
     }
 
     case 'eval': {
-      const [code] = args;
+      const code = args[0]!;
       console.log('⚙️  Evaluating:', code);
       const result = await page.evaluate((c) => eval(c), code);
       return `Result: ${JSON.stringify(result)}`;
     }
 
     case 'verify': {
-      const started = await page.evaluate(() => (window as any).repl?.scheduler?.started);
+      const started = await page.evaluate(() => (globalThis as any).repl?.scheduler?.started);
       if (started) {
         return 'Audio is playing';
       } else {
@@ -172,7 +163,7 @@ async function sendCommand(command: string, args: string[]) {
 
   return new Promise<void>((resolve, reject) => {
     const postData = JSON.stringify({ command, args });
-    const req = require('node:http').request({
+    const req = httpRequest({
       hostname: 'localhost',
       port,
       path: '/',
@@ -181,9 +172,9 @@ async function sendCommand(command: string, args: string[]) {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData)
       }
-    }, (res: any) => {
+    }, (res: IncomingMessage) => {
       let data = '';
-      res.on('data', (chunk: any) => {
+      res.on('data', (chunk) => {
         data += chunk;
       });
       res.on('end', () => {
@@ -212,7 +203,7 @@ function help() {
   reload                    - Reload current page
   click <selector>          - Click element (30s timeout)
   fill <selector> <text>    - Fill input field (30s timeout)
-  screenshot [path] [--viewport] - Take screenshot (full page by default, viewport-only with --viewport flag)
+  screenshot [--viewport]       - Take screenshot (full page by default, viewport-only with --viewport flag)
   eval <code>               - Evaluate JavaScript in page
   verify                    - Check if audio is playing
   help                      - Show this help
