@@ -4,35 +4,81 @@
   <meta charset="utf-8">
   <title>DJ Claude</title>
   <style>
-    body {
-      font-family: monospace;
-      background: #1a1a1a;
-      color: #0f0;
-      padding: 2rem;
+    * { box-sizing: border-box; }
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #111;
+      color: #eee;
+      font-family: system-ui, -apple-system, sans-serif;
     }
-    button {
-      font-size: 1.5rem;
-      padding: 1rem 2rem;
-      cursor: pointer;
-      background: #0f0;
-      color: #000;
+    #header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+    #play-pause {
+      width: 36px;
+      height: 36px;
       border: none;
+      border-radius: 50%;
+      background: #fff;
+      color: #111;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    #status {
-      margin-top: 1rem;
-      font-size: 1.2rem;
+    #play-pause:hover { transform: scale(1.1); }
+    #play-pause:active { transform: scale(0.95); }
+    #title {
+      font-size: 14px;
+      font-weight: 500;
+      opacity: 0.7;
     }
-    h1, button, #status {
-      position: relative;
-      z-index: 1;
+    #editor-container {
+      position: fixed;
+      top: 48px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: auto;
+    }
+    strudel-editor {
+      width: 100%;
+      min-height: 100%;
+    }
+    .cm-content {
+      cursor: default !important;
+    }
+    /* Scope canvas must render on top of code */
+    canvas {
+      z-index: 9999 !important;
+      opacity: 0.7;
     }
   </style>
 </head>
 <body>
-  <h1>DJ Claude</h1>
-  <button id="start">Start</button>
-  <div id="status"></div>
+  <header id="header">
+    <span id="title">DJ Claude</span>
+    <button id="play-pause" aria-label="Play">▶</button>
+  </header>
+  <script src="https://unpkg.com/@strudel/repl@1.2.7"></script>
+  <div id="editor-container">
+    <strudel-editor id="editor"></strudel-editor>
+  </div>
   <script type="module" src="/src/main.js"></script>
 </body>
 </html>

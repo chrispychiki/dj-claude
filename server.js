@@ -30,8 +30,6 @@ async function loadInitialPattern() {
   }
 }
 
-// Initial pattern loaded after browser reports sounds
-
 const server = Bun.serve({
   port: PORT,
   development: {
@@ -76,6 +74,7 @@ const server = Bun.serve({
         const { sounds } = await req.json();
         setBrowserSounds(sounds);
         console.log(`Browser reported ${sounds.length} sounds`);
+        // Load initial pattern here (not at startup) because validation needs sounds list
         if (!currentPattern) {
           await loadInitialPattern();
         }

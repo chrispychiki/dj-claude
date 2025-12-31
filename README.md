@@ -1,6 +1,6 @@
 # DJ Claude
 
-Turn Claude Code into a DJ. Claude edits [Strudel](https://strudel.cc) patterns, the server validates them, and the browser plays the music.
+Turn [Claude Code](https://www.anthropic.com/claude-code) into a DJ. Claude edits [Strudel](https://strudel.cc) patterns, the server validates them, and the browser plays the music.
 
 ## How it works
 
@@ -16,7 +16,9 @@ Patterns are validated using `@strudel/core` before the browser sees them. Inval
 
 ## Usage
 
-Start Claude Code in this directory and ask for tunes.
+Start Claude Code in this directory and ask for whatever you'd like.
+
+Example prompt: let's play some tunes! give me some original claude goodness. play each piece for a minute or two (just sleep yourself in between updates) and give me around a 10 min set. go for a variety of different sounds/styles across your set!
 
 ## Manual usage
 
@@ -24,7 +26,7 @@ Read `CLAUDE.md` and follow those steps yourself.
 
 ## Other agents
 
-Other coding agents use similar instruction files. Symlink `CLAUDE.md` to whatever your agent reads (e.g., `AGENTS.md` for Codex).
+Symlink `CLAUDE.md` to whatever your agent reads (e.g., `AGENTS.md` for Codex).
 
 ## Sounds
 
@@ -33,3 +35,11 @@ Includes drum samples from [Dirt](https://github.com/tidalcycles/Dirt-Samples) p
 ## License
 
 AGPL-3.0 (required by @strudel/core dependency)
+
+## Notes
+
+All code written and tested by Claude. Forgive me for any slop you encounter.
+
+Currently runs fine on my Mac mini. Not tested on any other devices/OSes.
+
+This project is not affiliated with, endorsed by, or sponsored by Anthropic.

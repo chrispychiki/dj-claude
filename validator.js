@@ -5,7 +5,10 @@ let initialized = false;
 let browserSounds = new Set();
 
 export function setBrowserSounds(sounds) {
-  browserSounds = new Set(sounds);
+  // Filter numeric-only sounds (808, 909) - strudel's mini-notation parser
+  // converts these to numbers, breaking both playback and highlighting
+  const filtered = sounds.filter(s => !/^\d+$/.test(s));
+  browserSounds = new Set(filtered);
   console.log(`Validator updated with ${browserSounds.size} browser sounds`);
 }
 
