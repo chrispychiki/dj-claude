@@ -1,27 +1,25 @@
-// 3am
 stack(
-  s("bd ~ [~ bd] ~, ~ cp ~ ~")
-    .gain(0.65),
+  // cmaj7 arp, filter drifts
+  note("c3 e3 g3 b3 c4 b3 g3 e3")
+    .s("supersaw").distort(0.6)
+    .lpf(perlin.slow(4).range(200, 1800))
+    .lpenv(perlin.slow(5).range(1, 3))
+    .gain(0.3).room(0.8),
 
-  s("hh(3,8)")
-    .gain(0.15),
+  // doubled, slightly flat
+  note("c3 e3 g3 b3 c4 b3 g3 e3")
+    .s("supersaw").detune(-0.8)
+    .lpf(perlin.slow(3).range(300, 1200))
+    .gain(0.25).room(0.7),
 
-  note("d2 ~ ~ d2 ~ d2 ~ ~, ~ ~ f2 ~ ~ ~ a2 ~")
-    .s("sawtooth")
-    .lpf(350)
-    .gain(0.45),
+  // slow root movement
+  note("<c1 g1>").slow(8)
+    .s("triangle").lpf(400)
+    .gain(0.4).room(0.3),
 
-  note("~ ~ <d4 f4> ~")
-    .s("sine")
-    .phaser(0.8)
-    .phaserdepth(0.6)
-    .gain(0.25)
-    .room(0.7)
-    .delay(0.4),
-
-  s("breaks165:0")
-    .striate(8)
-    .coarse(4)
-    .lpf(2500)
-    .gain(0.2)
-).cpm(72)
+  // rhythmic pulses underneath
+  note("<a1 e2>").slow(16)
+    .struct("x*4")
+    .s("triangle").clip(0.9).lpf(800)
+    .gain(0.2).room(0.4)
+).cpm(42)

@@ -23,7 +23,9 @@ Then run:
 
 Browser console and page errors are piped to background task output (`[BROWSER LOG]`, `[BROWSER ERROR]`).
 
-Other browser tools exist (e.g. screenshot, fill) in case the user needs assistance. Run `bun scripts/browser.ts help` for available commands.
+Other browser tools exist (e.g. screenshot, fill) in case the user needs assistance. Run `bun scripts/browser.ts help` for available commands. Do NOT guess what commands exist.
+
+Use kill shell when you need to end bg tasks rather than direct kill commands.
 
 ## DJing
 

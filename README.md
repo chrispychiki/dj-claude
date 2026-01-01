@@ -20,7 +20,7 @@ Start Claude Code in this directory and ask for whatever you'd like. Enable auto
 
 Example prompts:
 
-- "Let's play some tunes! Give me some original Claude goodness. Play each piece for a minute or two and give me around a 10 min set. Go for a variety of different sounds/styles across your set!"
+- "Take the current pattern as a starting point and keep evolving it. Explore different directions sonically. Let each iteration breathe for a minute before changing."
 - "I'd like some lofi beats to study to. Switch it up every minute or two."
 - "Show me what you got."
 
