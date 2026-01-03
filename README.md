@@ -1,22 +1,10 @@
 # DJ Claude
 
-Turn [Claude Code](https://www.anthropic.com/claude-code) into a DJ. Claude edits [Strudel](https://strudel.cc) patterns, the server validates them, and the browser plays the music.
-
-## How it works
-
-```
-Claude edits pattern.js
-        ↓
-POST /pattern (validates server-side)
-        ↓
-Browser polls, plays valid patterns
-```
-
-Patterns are validated using `@strudel/core` before the browser sees them. Invalid patterns return an error to Claude, valid ones play at the next poll interval. Music never stops due to a bad edit.
+Turn [Claude Code](https://www.anthropic.com/claude-code) into a DJ. Claude edits [Strudel](https://strudel.cc) patterns, the server validates them, and the browser plays the music. This feedback loop is the core principle of this system design and allows you to jam indefinitely.
 
 ## Usage
 
-Start Claude Code in this directory and ask for whatever you'd like. Enable auto-accept edits (<kbd>Shift</kbd>+<kbd>Tab</kbd>). You may want to modify the intro paragraph in `CLAUDE.md` to set your preferred vibe (restart Claude Code to apply changes).
+Start Claude Code in this directory and ask for whatever you'd like. Enable auto-accept edits (<kbd>Shift</kbd>+<kbd>Tab</kbd>).
 
 Example prompts:
 
@@ -24,13 +12,21 @@ Example prompts:
 - "I'd like some lofi beats to study to. Switch it up every minute or two."
 - "Show me what you got."
 
-## Manual usage
+### Tips
 
-Read `CLAUDE.md` and follow those steps yourself.
+- To be clear, don't expect Claude to be an actually good DJ. I'd say about half of his compositions are passable music, and maybe half of that is enjoyable music.
+- Be nice to your Claude! Keep your feedback high-level and open-ended and just let him cook. You'll eventually get a banger or two.
+- You'll need to provide the actual notes, structure, or code if you want to recreate a specific song. Claude does not have a good intuition for replicating existing music in Strudel.
+- However, you can specify instruments or styles (e.g. orchestral, jazzy piano, etc.). I'm no musician, but he seems to do a decent job with this sort of direction.
+- You may want to modify the intro paragraph in `CLAUDE.md` to set your preferred vibe (restart Claude Code to apply changes).
 
-## Other agents
+### Other agents
 
 Symlink `CLAUDE.md` to whatever your agent reads (e.g., `AGENTS.md` for Codex).
+
+### Manual usage
+
+Read `CLAUDE.md` and follow those steps yourself.
 
 ## Sounds
 

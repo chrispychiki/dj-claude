@@ -36,6 +36,9 @@ function updatePlayPauseButton() {
 async function applyPattern(code) {
   if (!editor?.editor) return false;
   try {
+    // .scope() enables visualization but requires patterns to be single expressions
+    // (no $: statements, use stack() instead). Enforced by validation as a side effect
+    // of evaluate() expecting a pattern back. There's probably a cleaner way.
     const wrapped = `(${code}).scope()`;
     editor.editor.setCode(wrapped);
     if (isPlaying) {
