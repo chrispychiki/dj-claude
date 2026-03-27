@@ -1,14 +1,17 @@
 import { chromium } from '@playwright/test';
-import type { Browser, Page, BrowserContext } from '@playwright/test';
+import type { Page, BrowserContext } from '@playwright/test';
 import { resolve } from 'node:path';
 import { mkdirSync, existsSync, writeFileSync, readFileSync, unlinkSync } from 'node:fs';
 import { createServer, request as httpRequest, type IncomingMessage } from 'node:http';
 import { execSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 
 const screenshotsDir = resolve(process.cwd(), 'screenshots');
 const portFile = resolve(process.cwd(), '.browser-port');
+const scriptDir = new URL('.', import.meta.url).pathname;
+const repoId = createHash('md5').update(scriptDir).digest('hex').slice(0, 8);
+const userDataDir = `/tmp/playwright-${repoId}`;
 
-let browser: Browser | null = null;
 let context: BrowserContext | null = null;
 let page: Page | null = null;
 
@@ -20,17 +23,23 @@ async function startServer() {
   }
 
   try {
-    execSync('pkill -f "playwright_chromiumdev_profile"', { stdio: 'ignore' });
+    execSync(`pkill -f "playwright-${repoId}"`, { stdio: 'ignore' });
   } catch {
     // No processes to kill
   }
 
-  browser = await chromium.launch({
+  try {
+    execSync(`rm -rf "${userDataDir}"`, { stdio: 'ignore' });
+  } catch {
+    // Directory doesn't exist
+  }
+
+  context = await chromium.launchPersistentContext(userDataDir, {
     headless: false,
-    args: ['--start-maximized']
+    args: ['--start-maximized'],
+    viewport: null
   });
-  context = await browser.newContext({ viewport: null });
-  page = await context.newPage();
+  page = context.pages()[0] || await context.newPage();
 
   page.on('console', msg => {
     console.log(`[BROWSER ${msg.type().toUpperCase()}]`, msg.text());
@@ -73,13 +82,13 @@ async function startServer() {
   });
 
   process.on('SIGTERM', async () => {
-    if (browser) await browser.close();
+    if (context) await context.close();
     if (existsSync(portFile)) unlinkSync(portFile);
     process.exit(0);
   });
 
   process.on('SIGINT', async () => {
-    if (browser) await browser.close();
+    if (context) await context.close();
     if (existsSync(portFile)) unlinkSync(portFile);
     process.exit(0);
   });
@@ -90,7 +99,8 @@ async function executeCommand(command: string, args: string[]): Promise<string> 
 
   switch (command) {
     case 'navigate': {
-      const url = args[0]!;
+      const url = args[0];
+      if (!url) throw new Error('navigate requires a URL argument');
       console.log('🌐 Navigating to:', url);
       await page.goto(url);
       await page.waitForLoadState('load');
@@ -98,15 +108,18 @@ async function executeCommand(command: string, args: string[]): Promise<string> 
     }
 
     case 'click': {
-      const selector = args[0]!;
+      const selector = args[0];
+      if (!selector) throw new Error('click requires a selector argument');
       console.log('👆 Clicking:', selector);
       await page.click(selector, { timeout: 30000 });
       return 'Click complete';
     }
 
     case 'fill': {
-      const selector = args[0]!;
-      const text = args[1]!;
+      const selector = args[0];
+      const text = args[1];
+      if (!selector) throw new Error('fill requires a selector argument');
+      if (text === undefined) throw new Error('fill requires a text argument');
       console.log('✍️  Filling:', selector, 'with:', text);
       await page.fill(selector, text, { timeout: 30000 });
       return 'Fill complete';
@@ -133,8 +146,10 @@ async function executeCommand(command: string, args: string[]): Promise<string> 
     }
 
     case 'eval': {
-      const code = args[0]!;
+      const code = args[0];
+      if (!code) throw new Error('eval requires a code argument');
       console.log('⚙️  Evaluating:', code);
+      // biome-ignore lint/security/noGlobalEval: eval command is intentional for browser testing
       const result = await page.evaluate((c) => eval(c), code);
       return `Result: ${JSON.stringify(result)}`;
     }
@@ -198,7 +213,7 @@ function help() {
   console.log(`
 📖 Browser Commands (state persists once browser is started):
 
-  start                     - Start browser server (kills existing playwright browsers)
+  start                     - Start browser server (BLOCKS - requires run_in_background)
   navigate <url>            - Navigate to URL (30s timeout)
   reload                    - Reload current page
   click <selector>          - Click element (30s timeout)
